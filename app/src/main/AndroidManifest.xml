@@ -4,7 +4,7 @@
   <application
       android:label="Relay"
       android:usesCleartextTraffic="true"
-      android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+      android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
     <activity android:name=".MainActivity"
               android:exported="true"
