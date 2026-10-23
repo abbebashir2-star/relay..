@@ -1,5 +1,3 @@
-# deploy
-
 name: worker
 
 on:
@@ -8,15 +6,37 @@ on:
     paths: ["worker/**", ".github/workflows/worker.yml"]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: cfut_LTY12fgADkwqoPvjmK8RYkwG9wuGlgmOejuOjVFde664761b
     steps:
       - uses: actions/checkout@v4
 
-      - uses: cloudflare/wrangler-action@v3
+      - uses: actions/setup-node@v4
         with:
-          apiToken: cfut_LTY12fgADkwqoPvjmK8RYkwG9wuGlgmOejuOjVFde664761b
-          accountId: bad8e6b153dbccfc6a23b029d84ce3f6
-          workingDirectory: worker
-          command: deploy
+          node-version: "22"
+
+      - name: koll och deploy
+        working-directory: worker
+        run: |
+          {
+            echo "=== vem ar token ==="
+            npx --yes wrangler@3 whoami
+            echo
+            echo "=== deploy ==="
+            npx --yes wrangler@3 deploy
+          } > ../logg.txt 2>&1 || true
+          cat ../logg.txt
+
+      - name: spara loggen
+        run: |
+          git config user.email "bot@local"
+          git config user.name "bot"
+          git add -f logg.txt
+          git commit -m "deploylog" || true
+          git push || true
