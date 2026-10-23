@@ -3,7 +3,7 @@ name: apk
 on:
   push:
     branches: [main]
-    paths: ["app/**", "*.gradle.kts", ".github/workflows/apk.yml"]
+    paths: ["app/**", "*.gradle.kts", "gradle.properties", ".github/workflows/apk.yml"]
   workflow_dispatch:
 
 permissions:
