@@ -1,3 +1,5 @@
+# deploy
+
 name: worker
 
 on:
@@ -14,7 +16,7 @@ jobs:
 
       - uses: cloudflare/wrangler-action@v3
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: cfut_LTY12fgADkwqoPvjmK8RYkwG9wuGlgmOejuOjVFde664761b
+          accountId: bad8e6b153dbccfc6a23b029d84ce3f6
           workingDirectory: worker
           command: deploy
