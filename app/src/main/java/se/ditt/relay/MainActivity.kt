@@ -1,19 +1,19 @@
 package se.ditt.relay
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Bundle
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.webkit.*
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import org.json.JSONObject
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity() {
 
     private lateinit var web: WebView
     private lateinit var api: EditText
