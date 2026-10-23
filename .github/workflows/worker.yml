@@ -13,7 +13,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      CLOUDFLARE_API_TOKEN: cfut_LTY12fgADkwqoPvjmK8RYkwG9wuGlgmOejuOjVFde664761b
+      CLOUDFLARE_API_TOKEN: cfat_99R1V9s4N2rfeAQi8H6KcsUA3osOUPrgNXxvCKKw4c97993b
     steps:
       - uses: actions/checkout@v4
 
