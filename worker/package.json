@@ -1,0 +1,5 @@
+{
+  "name": "relay-worker",
+  "private": true,
+  "type": "module"
+}
