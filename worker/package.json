@@ -1,5 +1,8 @@
 {
   "name": "relay-worker",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
 }
